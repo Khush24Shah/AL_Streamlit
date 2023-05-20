@@ -1,4 +1,3 @@
-from cProfile import label
 import streamlit as st
 import plotly.express as px
 import matplotlib.pyplot as plt
@@ -127,11 +126,10 @@ elif st.button("Run Active Learning"):
         x_pool = np.delete(x_pool, sample_idx, axis=0)
         y_pool = np.delete(y_pool, sample_idx, axis=0)
 
-        if iteration%(iterations//10) == 0:
+        if iteration%(np.ceil(iterations/10)) == 0:
             st.write(f"Completed Iteration: {iteration} with Overall Train Accuracy: {overall_accuracy[-1]} and Overall Test Accuracy: {overall_test_accuracy[-1]}")
 
     # Plot Training Accuracy
-
     fig = px.line(title="Training Accuracy", labels={"x": "Iterations", "y": "Accuracy"})
     fig.add_scatter(x=np.arange(iterations), y=overall_accuracy, name="Overall")
     for i in range(len(models_accuracy_list)):
@@ -145,8 +143,8 @@ elif st.button("Run Active Learning"):
         fig.add_scatter(x=np.arange(iterations), y=models_test_accuracy_list[i], name=classifiers[i])
     st.write(fig)
 
-    for iteration in range(len(models)):
-        plot_cluster(x, y, model=models[iteration], name=classifiers[iteration])
+    for i in range(len(models)):
+        plot_cluster(x, y, model=models[i], name=classifiers[i] + " Final Model")
     
     for i in range(len(anim_model)):
         anim_model[i].show()

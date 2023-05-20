@@ -1,5 +1,4 @@
 from matplotlib import pyplot as plt
-import plotly.express as px
 import plotly.graph_objects as go
 
 import matplotlib.animation as animation
@@ -40,7 +39,12 @@ class plotAnimation:
         
         self.ax.legend([scat], ["Last Batch"], loc="lower right")
 
-        self.ax.set_title(f"Iteration: {i}, Train Accuracy: {round(self.data[i][3], 3)}, Test Accuracy: {round(self.data[i][4], 3)}")
+        title = f"Iteration: {i}, Train Accuracy: {round(self.data[i][3], 3)}, Test Accuracy: {round(self.data[i][4], 3)}"
+
+        if self.model_name:
+            title = self.model_name + " " + title
+
+        self.ax.set_title(title)
 
         return self.ax
 
@@ -52,9 +56,6 @@ class plotAnimation:
         
         self.ax.set_xlim(self.xlim)
         self.ax.set_ylim(self.ylim)
-
-        if self.model_name:
-            self.ax.set_title(self.model_name)
 
         anim = animation.FuncAnimation(self.fig, self.animate, frames=len(self.data), interval=500, blit=False, repeat=False)
         # video = anim.to_html5_video()

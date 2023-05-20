@@ -92,28 +92,11 @@ def plot_cluster(x, y, model=None, samples=None, name=None):
 
     if name:
         fig.update_layout(title=name)
-
-    st.write("Here")
+    
     st.write(fig)
 
 
 def plot_contour(x, model=None):
-    # x_min, x_max =x[:, 0].min(), x[:, 0].max() 
-    # y_min, y_max =x[:, 1].min(), x[:, 1].max()
-
-    # xx, yy = torch.meshgrid(torch.arange(x_min, x_max, 0.05), torch.arange(y_min, y_max, 0.05))
-
-    # if model is None:
-    #     Z = torch.empty(xx.ravel().shape)
-    #     for i in range(xx.ravel().shape[0]):
-    #         Z[i] = 1 if (xx.ravel()[i] * yy.ravel()[i] > torch.tensor(0)) else 0
-    # else:
-    #     Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
-
-    # Z = Z.reshape(xx.shape)
-
-    # return (xx, yy, Z)
-
     x_min, x_max = x[:, 0].min() - 0.5, x[:, 0].max() + 0.5
     y_min, y_max = x[:, 1].min() - 0.5, x[:, 1].max() + 0.5
 
