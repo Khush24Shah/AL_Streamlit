@@ -1,0 +1,7 @@
+streamlit
+plotly
+matplotlib
+numpy
+torch
+sklearn
+time
