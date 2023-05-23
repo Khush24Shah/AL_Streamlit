@@ -1,10 +1,9 @@
-import torch
 import numpy as np
 
 def entropy_sampling(stack):
     entropy_list = []
     for x in stack:
-        unique_values, counts = torch.unique(x, return_counts=True)
+        unique_values, counts = np.unique(x, return_counts=True)
         length = x.shape[0]
         if len(unique_values) == 1:
             entropy_list.append(0)
@@ -18,7 +17,7 @@ def entropy_sampling(stack):
 def margin_sampling(stack):
     margin_list = []
     for x in stack:
-        unique_values, counts = torch.unique(x, return_counts=True)
+        unique_values, counts = np.unique(x, return_counts=True)
         length = x.shape[0]
         if len(unique_values) == 1:
             margin_list.append(0)
@@ -29,7 +28,7 @@ def margin_sampling(stack):
 def least_confidence(stack):
     least_confidence_list = []
     for x in stack:
-        unique_values, counts = torch.unique(x, return_counts=True)
+        unique_values, counts = np.unique(x, return_counts=True)
         length = x.shape[0]
         if len(unique_values) == 1:
             least_confidence_list.append(0)

@@ -1,8 +1,6 @@
 import streamlit as st
 import plotly.express as px
-import matplotlib.pyplot as plt
 import numpy as np
-import torch
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import make_moons, make_circles, make_classification, make_blobs
 from sklearn.neighbors import KNeighborsClassifier
@@ -12,7 +10,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.metrics import accuracy_score
 from AL_Metrics import get_uncertainty
-from AL_Plots import plot_cluster
+from AL_Plots import plot_cluster, plot_accuracy
 from AL_Animation import plotAnimation
 
 def validate_size(classifiers, size=0):
@@ -85,12 +83,17 @@ elif st.button("Run Active Learning"):
         return np.argsort(uncertainty)[-samples:]
     
     def output_list(stack):
-        output_list = np.array([int(torch.bincount(x).argmax()) for x in stack])
+        output_list = np.array([int(np.bincount(x).argmax()) for x in stack])
         return output_list
     
+    # Split data into training and testing
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=10)
     x_training, x_pool, y_training, y_pool = train_test_split(x_train, y_train, test_size=0.975, random_state=10)
 
+    iteration_placeholder_train = st.empty()
+    iteration_placeholder_test = st.empty()
+
+    # Active Learning Loop
     for iteration in range(iterations):
         y_pred = []
         y_pred_train = []
@@ -101,16 +104,16 @@ elif st.button("Run Active Learning"):
             models_accuracy_list[model_idx].append(accuracy_score(y_train, pred_train))
             pred_test = model.predict(x_test)
             models_test_accuracy_list[model_idx].append(accuracy_score(y_test, pred_test))
-            y_pred.append(torch.tensor(model.predict(x_pool)))
-            y_pred_train.append(torch.tensor(pred_train))
-            y_pred_test.append(torch.tensor(pred_test))
-        
-        stack = torch.stack(y_pred, dim = -1)
+            y_pred.append(np.array(model.predict(x_pool)))
+            y_pred_train.append(np.array(pred_train))
+            y_pred_test.append(np.array(pred_test))
+
+        stack = np.stack(y_pred, axis=-1)
         sample_idx = select_samples(get_uncertainty(stack, metric=metric), samples)
 
-        stack_train = torch.stack(y_pred_train, dim = -1)
+        stack_train = np.stack(y_pred_train, axis=-1)
 
-        stack_test = torch.stack(y_pred_test, dim = -1)
+        stack_test = np.stack(y_pred_test, axis=-1)
 
         output_train = output_list(stack_train)
         overall_accuracy.append(accuracy_score(output_train, y_train))
@@ -126,25 +129,19 @@ elif st.button("Run Active Learning"):
         x_pool = np.delete(x_pool, sample_idx, axis=0)
         y_pool = np.delete(y_pool, sample_idx, axis=0)
 
-        if iteration%(np.ceil(iterations/10)) == 0:
-            st.write(f"Completed Iteration: {iteration} with Overall Train Accuracy: {overall_accuracy[-1]} and Overall Test Accuracy: {overall_test_accuracy[-1]}")
-
+        iteration_placeholder_train.write(plot_accuracy(title="Training Accuracy", overall_accuracy=overall_accuracy, models_accuracy_list=models_accuracy_list, classifiers=classifiers, iteration=iteration))
+        iteration_placeholder_test.write(plot_accuracy(title="Test Accuracy", overall_accuracy=overall_test_accuracy, models_accuracy_list=models_test_accuracy_list, classifiers=classifiers, iteration=iteration))
+    
     # Plot Training Accuracy
-    fig = px.line(title="Training Accuracy", labels={"x": "Iterations", "y": "Accuracy"})
-    fig.add_scatter(x=np.arange(iterations), y=overall_accuracy, name="Overall")
-    for i in range(len(models_accuracy_list)):
-        fig.add_scatter(x=np.arange(iterations), y=models_accuracy_list[i], name=classifiers[i])
-    st.write(fig)
+    iteration_placeholder_train.write(plot_accuracy(title="Training Accuracy", overall_accuracy=overall_accuracy, models_accuracy_list=models_accuracy_list, classifiers=classifiers, iteration=iterations))
 
     # Plot Test Accuracy
-    fig = px.line(title="Test Accuracy", labels={"x": "Iterations", "y": "Accuracy"})
-    fig.add_scatter(x=np.arange(iterations), y=overall_test_accuracy, name="Overall")
-    for i in range(len(models_test_accuracy_list)):
-        fig.add_scatter(x=np.arange(iterations), y=models_test_accuracy_list[i], name=classifiers[i])
-    st.write(fig)
+    iteration_placeholder_test.write(plot_accuracy(title="Test Accuracy", overall_accuracy=overall_test_accuracy, models_accuracy_list=models_test_accuracy_list, classifiers=classifiers, iteration=iterations))
 
+    # Plot Final Model
     for i in range(len(models)):
         plot_cluster(x, y, model=models[i], name=classifiers[i] + " Final Model")
     
+    # Plot Animation
     for i in range(len(anim_model)):
         anim_model[i].show()

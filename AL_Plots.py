@@ -1,38 +1,9 @@
-import torch
 import numpy as np
-from matplotlib import pyplot as plt
+import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
 def plot_cluster(x, y, model=None, samples=None, name=None):
-    # x_min, x_max =x[:, 0].min(), x[:, 0].max() 
-    # y_min, y_max =x[:, 1].min(), x[:, 1].max() 
-
-    # xx, yy = torch.meshgrid(torch.arange(x_min, x_max, 0.05), torch.arange(y_min, y_max, 0.05))
-
-    # if model is None:
-    #     Z = torch.empty(xx.ravel().shape)
-    #     for i in range(xx.ravel().shape[0]):
-    #         if (xx.ravel()[i] * yy.ravel()[i] > torch.tensor(0)):
-    #             Z[i]=1
-    #         else:
-    #             Z[i]=0
-    # else:
-    #     Z=model.predict(np.c_[xx.ravel(), yy.ravel()])
-
-    # Z=Z.reshape(xx.shape)
-    # ax.contourf(xx, yy, Z, cmap=plt.cm.RdYlBu)
-    # if model is None:
-    #     ax.scatter(x, y, color="orange")
-    # else:
-    #     ax.scatter(x[:, 0], x[:, 1], c=y, cmap='viridis')
-    
-    # if samples is not None:
-    #     ax.scatter(samples[:, 0], samples[:, 1], color="white", cmap="viridis")
-    
-    # ax.set_xlim(x_min, x_max)
-    # ax.set_ylim(y_min, y_max)
-
     x_min, x_max = x[:, 0].min() - 0.5, x[:, 0].max() + 0.5
     y_min, y_max = x[:, 1].min() - 0.5, x[:, 1].max() + 0.5
 
@@ -56,7 +27,7 @@ def plot_cluster(x, y, model=None, samples=None, name=None):
         z=Z,
         colorscale='RdYlBu',
         contours_coloring='heatmap',
-        opacity=1
+        opacity=0.75,
     ))
 
     if model is None:
@@ -65,7 +36,7 @@ def plot_cluster(x, y, model=None, samples=None, name=None):
             x=x[:, 0],
             y=x[:, 1],
             mode='markers',
-            marker=dict(color='orange')
+            marker=dict(color='orange', line=dict(color='black', width=1)),
         ))
     else:
         # Plot data points with labels when a model is provided
@@ -73,7 +44,7 @@ def plot_cluster(x, y, model=None, samples=None, name=None):
             x=x[:, 0],
             y=x[:, 1],
             mode='markers',
-            marker=dict(color=y, colorscale='viridis')
+            marker=dict(color=y, colorscale='RdYlBu', line=dict(color='black', width=1))
         ))
 
     if samples is not None:
@@ -82,12 +53,14 @@ def plot_cluster(x, y, model=None, samples=None, name=None):
             x=samples[:, 0],
             y=samples[:, 1],
             mode='markers',
-            marker=dict(color='white', colorscale='viridis')
+            marker=dict(color='white', colorscale='RdYlBu', line=dict(color='black', width=1))
         ))
 
     fig.update_layout(
-        xaxis=dict(range=[x_min, x_max]),
-        yaxis=dict(range=[y_min, y_max])
+        xaxis=dict(range=(x_min, x_max)),
+        yaxis=dict(range=(y_min, y_max)),
+        width=650,
+        height=650
     )
 
     if name:
@@ -110,5 +83,12 @@ def plot_contour(x, model=None):
         Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
 
     Z = Z.reshape(xx.shape)
-
     return (xx, yy, Z)
+
+
+def plot_accuracy(title, overall_accuracy, models_accuracy_list, classifiers, iteration):
+    fig = px.line(title=title, labels={"x": "Iterations", "y": "Accuracy"})
+    fig.add_scatter(x=np.arange(iteration), y=overall_accuracy, name="Overall")
+    for i in range(len(models_accuracy_list)):
+        fig.add_scatter(x=np.arange(iteration), y=models_accuracy_list[i], name=classifiers[i])
+    return fig

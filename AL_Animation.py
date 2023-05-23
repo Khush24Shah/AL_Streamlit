@@ -1,5 +1,4 @@
 from matplotlib import pyplot as plt
-import plotly.graph_objects as go
 
 import matplotlib.animation as animation
 import streamlit.components.v1 as components
@@ -24,18 +23,18 @@ class plotAnimation:
         self.contour.append(plot_contour(self.x_whole, self.model))
     
     def animate(self, i):
-        self.ax.contourf(self.contour[i][0], self.contour[i][1], self.contour[i][2], cmap=plt.cm.RdYlBu)
+        self.ax.contourf(self.contour[i][0], self.contour[i][1], self.contour[i][2], cmap=plt.cm.RdYlBu, alpha=0.8)
 
         if self.model is None:
-            self.ax.scatter(self.x_whole, self.y_whole, color="orange")
+            self.ax.scatter(self.x_whole, self.y_whole, color="orange", edgecolors="k")
         else:
-            scat = self.ax.scatter(self.data[i][0][:, 0], self.data[i][0][:, 1], c=self.data[i][1], cmap="viridis")
+            scat = self.ax.scatter(self.data[i][0][:, 0], self.data[i][0][:, 1], c=self.data[i][1], cmap="RdYlBu", edgecolors="k")
 
         legend1 = self.ax.legend(*scat.legend_elements(), loc = "upper right", title = "Classes")
         
         self.ax.add_artist(legend1)
 
-        scat = self.ax.scatter(self.data[i][2][:, 0], self.data[i][2][:, 1], color="white", cmap="viridis", label="Last Batch")
+        scat = self.ax.scatter(self.data[i][2][:, 0], self.data[i][2][:, 1], color="white", label="Last Batch", edgecolors="k")
         
         self.ax.legend([scat], ["Last Batch"], loc="lower right")
 
@@ -61,6 +60,3 @@ class plotAnimation:
         # video = anim.to_html5_video()
 
         components.html(anim.to_jshtml(), height=1000)
-
-        fig = go.Figure()
-
