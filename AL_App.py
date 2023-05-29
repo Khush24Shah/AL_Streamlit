@@ -16,21 +16,21 @@ from AL_Animation import plotAnimation
 def validate_size(classifiers, size=0):
     s = len(classifiers)
 
-    if s == 0:
-        return False
-    
-    if size != 0 and s != size:
+    # Check if classifiers is empty or size does not match length of classifiers
+    if s == 0 or (s != size and size != 0):
         return False
     return True
 
 # Title
 st.title("Active Learning Calssification")
 
+# Load the datasets
 datasets = {
     "Moons": make_moons(n_samples=1000, noise=0.3, random_state=10),
     "Circles": make_circles(n_samples=1000, noise=0.3, factor=0.5, random_state=10),
     "Classification": make_classification(n_samples=1000, n_features=2, n_redundant=0, n_informative=2, n_clusters_per_class=1, random_state=10),
-    "Blobs": make_blobs(n_samples=1000, n_features=2, centers=5, cluster_std=1.75, random_state=10)}
+    "Blobs": make_blobs(n_samples=1000, n_features=2, centers=5, cluster_std=1.75, random_state=10)
+    }
 
 dataset = st.selectbox(label="Select Dataset to train Active Learning Model on:", options=("Moons", "Circles", "Classification", "Blobs"))
 
@@ -112,7 +112,6 @@ elif st.button("Run Active Learning"):
         sample_idx = select_samples(get_uncertainty(stack, metric=metric), samples)
 
         stack_train = np.stack(y_pred_train, axis=-1)
-
         stack_test = np.stack(y_pred_test, axis=-1)
 
         output_train = output_list(stack_train)
@@ -129,7 +128,9 @@ elif st.button("Run Active Learning"):
         x_pool = np.delete(x_pool, sample_idx, axis=0)
         y_pool = np.delete(y_pool, sample_idx, axis=0)
 
+        # Plot Training Accuracy
         iteration_placeholder_train.write(plot_accuracy(title="Training Accuracy", overall_accuracy=overall_accuracy, models_accuracy_list=models_accuracy_list, classifiers=classifiers, iteration=iteration))
+        # Plot Test Accuracy
         iteration_placeholder_test.write(plot_accuracy(title="Test Accuracy", overall_accuracy=overall_test_accuracy, models_accuracy_list=models_test_accuracy_list, classifiers=classifiers, iteration=iteration))
     
     # Plot Training Accuracy

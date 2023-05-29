@@ -55,16 +55,16 @@ def plot_cluster(x, y, model=None, samples=None, name=None):
             mode='markers',
             marker=dict(color='white', colorscale='RdYlBu', line=dict(color='black', width=1))
         ))
+    
+    if name:
+        fig.update_layout(title=name)
 
     fig.update_layout(
         xaxis=dict(range=(x_min, x_max)),
         yaxis=dict(range=(y_min, y_max)),
-        width=650,
-        height=650
+        width=700,
+        height=600
     )
-
-    if name:
-        fig.update_layout(title=name)
     
     st.write(fig)
 
@@ -88,7 +88,7 @@ def plot_contour(x, model=None):
 
 def plot_accuracy(title, overall_accuracy, models_accuracy_list, classifiers, iteration):
     fig = px.line(title=title, labels={"x": "Iterations", "y": "Accuracy"})
-    fig.add_scatter(x=np.arange(iteration), y=overall_accuracy, name="Overall")
     for i in range(len(models_accuracy_list)):
         fig.add_scatter(x=np.arange(iteration), y=models_accuracy_list[i], name=classifiers[i])
+    fig.add_scatter(x=np.arange(iteration), y=overall_accuracy, name="Overall")
     return fig
